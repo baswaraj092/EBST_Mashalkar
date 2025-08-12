@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Engineering Branch Finder — EN + मराठी</title>
+<style>
+  :root{
+    --bg:#0f1724; --card:#0b1220; --accent:#6EE7B7; --muted:#94a3b8;
+    --glass: rgba(255,255,255,0.04);
+    --glass-2: rgba(255,255,255,0.02);
+    --card-radius:14px;
+    --text:#e6eef3;
+    --marathi:#FFD28A;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg, #071022 0%, #071827 60%);
+    color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    padding:28px;
+    min-height:100vh;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+  header{display:flex;gap:16px;align-items:center;margin-bottom:18px}
+  .logo{
+    width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,#0ea5a9,#7c3aed);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:white;box-shadow:0 6px 18px rgba(0,0,0,0.4);
+  }
+  h1{margin:0;font-size:22px}
+  p.lead{color:var(--muted);margin:6px 0 18px}
+
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+    border-radius:var(--card-radius); padding:18px; box-shadow: 0 6px 30px rgba(2,6,23,0.6); border:1px solid rgba(255,255,255,0.03);
+  }
+
+  /* progress */
+  .progressWrap{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .bar{
+    height:12px;background:var(--glass-2);border-radius:999px;flex:1;overflow:hidden;position:relative;
+    box-shadow: inset 0 -3px 10px rgba(0,0,0,0.6);
+  }
+  .bar > i{position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#60a5fa);border-radius:999px;transition:width .45s cubic-bezier(.2,.9,.3,1)}
+  .progressText{min-width:72px;text-align:right;color:var(--muted);font-size:13px}
+
+  /* question */
+  .qWrap{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:start}
+  .qIcon{width:64px;height:64px;border-radius:10px;background:linear-gradient(135deg,#1f2937,#0b1220);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+  .qBox{padding:14px}
+  .qText{font-size:17px;margin:0 0 6px}
+  .qMar{font-size:14px;color:var(--marathi);margin:0 0 10px}
+
+  .options{display:grid;gap:8px}
+  .opt{
+    background:var(--glass);border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid rgba(255,255,255,0.02);
+    transition:all .22s ease; user-select:none;
+  }
+  .opt:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,0.45)}
+  .opt input{transform:scale(1.2)}
+  .opt .label{font-size:15px}
+  .meta{font-size:12px;color:var(--muted)}
+
+  .nav{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:14px}
+  .btn{background:linear-gradient(90deg,#10b981,#06b6d4);border:none;padding:10px 14px;border-radius:10px;color:#07202a;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+  .btnSecondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+
+  /* result */
+  .resultWrap{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+  .branchCard{display:flex;gap:12px;align-items:center;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .branchIcon{width:62px;height:62px;border-radius:10px;background:linear-gradient(90deg,#6ee7b7,#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:800}
+  .branchText h3{margin:0;font-size:16px}
+  .branchText p{margin:6px 0 0;color:var(--muted);font-size:14px}
+
+  footer{color:var(--muted);font-size:13px;margin-top:18px;text-align:center}
+
+  /* mobile */
+  @media (max-width:700px){
+    .qWrap{grid-template-columns:60px 1fr}
+    header{flex-direction:column;align-items:flex-start;gap:8px}
+  }
+
+  /* animations */
+  .fadeIn{animation:fadeIn .45s ease both}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .slideLeft{animation:slideLeft .4s ease both}
+  @keyframes slideLeft{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+  .pulse{animation:pulse .9s infinite alternate}
+  @keyframes pulse{from{transform:scale(1)}to{transform:scale(1.02)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">EBST</div>
+    <div>
+      <h1>Engineering Branch Finder — <span style="color:var(--marathi)">इंजिनीयरिंग शाखा शोधक</span></h1>
+      <p class="lead">50 short situational questions — English + मराठी. Simple, animated, and ready for 12th standard students in Maharashtra.</p>
+    </div>
+  </header>
+
+  <main class="card" id="app">
+    <!-- intro -->
+    <section id="intro" class="fadeIn">
+      <h2 style="margin-top:0">Start Quiz — सुरुवात करा</h2>
+      <p class="meta">Answer honestly. उत्तर प्रामाणिकपणे द्या. We'll suggest top branches and explain why each fits you. आम्ही तुम्हाला टॉप शाखा सुचवू आणि का योग्य आहे ते देखील सांगू.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn" id="startBtn">Start — सुरू करा</button>
+        <button class="btnSecondary" id="howBtn">How it works — कसे काम करते</button>
+      </div>
+    </section>
+
+    <!-- quiz area -->
+    <section id="quizArea" style="display:none" class="fadeIn">
+      <div class="progressWrap">
+        <div class="bar"><i id="progressBar"></i></div>
+        <div class="progressText" id="progressText">0 / 50</div>
+      </div>
+
+      <div id="questionCard" class="qWrap fadeIn">
+        <div class="qIcon" id="qIcon" aria-hidden="true">
+          <!-- SVG placeholder -->
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 2v20" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12h20" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <div class="qBox">
+          <p class="qText" id="qEnglish">Q English</p>
+          <p class="qMar" id="qMarathi">Q Marathi</p>
+
+          <div class="options" id="options"></div>
+          <div class="nav">
+            <button class="btnSecondary" id="prevBtn">Previous — मागील</button>
+            <button class="btnSecondary" id="skipBtn">Skip — वगळा</button>
+            <button class="btn" id="nextBtn">Next — पुढे</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- result -->
+    <section id="resultArea" style="display:none">
+      <h2>Results — निकाल</h2>
+      <p class="meta">Top suggested branches and why they fit you. पुढील शाखा आणि का योग्य आहे ते खालीलप्रमाणे.</p>
+
+      <div id="resultContainer" class="resultWrap"></div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="restartBtn">Retake Quiz — पुन्हा सुरु करा</button>
+        <button class="btnSecondary" id="downloadBtn">Download Report — अहवाल डाउनलोड करा</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Crafted with care • मराठीतून सोपे प्रश्न • Share & use freely
+  </footer>
+</div>
+
+<script>
+/* =========================
+   Branch list and details
+   ========================= */
+const BRANCHES = {
+  civil: {name:"Civil Engineering", mr:"सिव्हिल इंजिनिअरिंग", color:"#60a5fa", short:"Designing buildings, bridges, roads. इमारती, पुल, रस्ते."},
+  mechanical: {name:"Mechanical Engineering", mr:"मेकेनिकल इंजिनिअरिंग", color:"#f59e0b", short:"Machines, engines, and manufacturing. यंत्रे आणि उत्पादन."},
+  entc: {name:"Electronics & Telecommunication", mr:"इलेक्ट्रॉनिक्स व दूरसंचार", color:"#7c3aed", short:"Communication systems & electronics. नेटवर्क व इलेक्ट्रॉनिक्स."},
+  electronics: {name:"Electronics Engineering", mr:"इलेक्ट्रॉनिक्स इंजिनिअरिंग", color:"#34d399", short:"Circuits, chips, embedded systems. परिपथ व चिप्स."},
+  electrical: {name:"Electrical Engineering", mr:"इलेक्ट्रिकल इंजिनिअरिंग", color:"#ef4444", short:"Power systems & energy. वीज प्रणाली."},
+  cs: {name:"Computer Science", mr:"संगणक शास्त्र", color:"#06b6d4", short:"Software, algorithms, programming. सॉफ्टवेअर व प्रोग्रॅमिंग."},
+  it: {name:"Information Technology", mr:"इन्फोर्मेशन टेक्नॉलॉजी", color:"#a78bfa", short:"Networks, systems, IT solutions. नेटवर्क व सिस्टीम."},
+  ai: {name:"Artificial Intelligence", mr:"कृत्रिम बुद्धिमत्ता (AI)", color:"#f472b6", short:"AI systems and intelligent automation. बुद्धिमान प्रणाली."},
+  aiml: {name:"AI & Machine Learning", mr:"AI व मशीन लर्निंग", color:"#60a5fa", short:"ML models and predictions. भविष्यातील अंदाज."},
+  aids: {name:"AI & Data Science", mr:"AI व डेटा सायन्स", color:"#34d399", short:"Data analysis and visualization. डेटा विश्लेषण."},
+  mechatronics: {name:"Mechatronics", mr:"मेकाट्रॉनिक्स", color:"#fb7185", short:"Combines mechanical, electronics & computing. संयोजन प्रणाली."},
+  chemical: {name:"Chemical Engineering", mr:"रासायनिक इंजिनिअरिंग", color:"#f97316", short:"Chemical processes & manufacturing. रासायनिक प्रक्रिया."},
+  biomedical: {name:"Biomedical Engineering", mr:"बायोमेडिकल इंजिनिअरिंग", color:"#60a5fa", short:"Medical devices and healthcare tech. वैद्यकीय उपकरणे."},
+  instrumentation: {name:"Instrumentation", mr:"इन्स्ट्रुमेंटेशन", color:"#10b981", short:"Sensors, measurement & control. मोजमाप व नियंत्रण."},
+  robotics: {name:"Robotics", mr:"रोबोटिक्स", color:"#8b5cf6", short:"Autonomous machines & automation. स्वयंपूर्ण यंत्रे."},
+  datasci: {name:"Data Science", mr:"डेटा सायन्स", color:"#06b6d4", short:"Large data, trends & models. मोठे डेटा व ट्रेंड्स."},
+  cyber: {name:"Cybersecurity", mr:"सायबरसुरक्षा", color:"#ef4444", short:"Protecting systems & data from attacks. सुरक्षा व संरक्षण."}
+};
+
+/* =========================
+   Questions (50) with bilingual text
+   and weights: object where keys are branches and values are weights (0-3)
+   ========================= */
+const QUESTIONS = [
+/* 1 */ {en:"You see a new flyover/bridge and wonder how it was designed.", mr:"नवीन ओवरब्रिज/फ्लायओव्हर बघून तुम्हाला ते कसे डिझाइन केले गेले याची उत्सुकता वाटते.", w:{civil:3}},
+/* 2 */ {en:"You enjoy opening a toy or gadget to see its parts.", mr:"खेळण्याचे किंवा गॅझेटचे भाग उघडून बघायला आवडते.", w:{electronics:2, mechatronics:2}},
+/* 3 */ {en:"After a power cut you wonder how electricity is produced and supplied.", mr:"विजेचा कट झाल्यावर वीज कशी तयार होते आणि कशी पुरवली जाते हे जाणून घ्यायचे वाटते.", w:{electrical:3, civil:1}},
+/* 4 */ {en:"You like building a small app or game on your phone/computer.", mr:"मोबाईल/संगणकावर लहान अॅप किंवा गेम बनवायला आवडते.", w:{cs:3, it:1}},
+/* 5 */ {en:"Robots that work on their own excite you.", mr:"स्वतः काम करणारे रोबोट पाहून उत्साह वाटतो.", w:{robotics:3, mechatronics:2, ai:1}},
+/* 6 */ {en:"You’re curious how hospital testing machines work.", mr:"रुग्णालयातील टेस्ट मशीन कसे काम करतात हे जाणून घ्यायला उत्सुकता आहे.", w:{biomedical:3, instrumentation:2}},
+/* 7 */ {en:"You enjoy puzzles that need math and logic.", mr:"गणित व तर्क वापरून सुटणारी कोडे सोडवायला आवडते.", w:{cs:2, ai:2, datasci:2}},
+/* 8 */ {en:"You like fixing a bicycle, fan, or small machine at home.", mr:"घरी सायकल, पंखा किंवा लहान यंत्र दुरुस्त करायला आवडते.", w:{mechanical:3, mechatronics:1}},
+/* 9 */ {en:"Designing chemical processes for medicines or paints interests you.", mr:"औषधे किंवा रंग तयार करण्याच्या रासायनिक प्रक्रियेचे डिझाइन आवडते.", w:{chemical:3}},
+/*10 */ {en:"You enjoy experimenting with sensors, Arduino, or Raspberry Pi kits.", mr:"सेंसर, Arduino किंवा Raspberry Pi किटसह प्रयोग करायला आवडते.", w:{electronics:2, mechatronics:2, robotics:1}},
+/*11 */ {en:"You like how computers learn from data (e.g., recommendations).", mr:"डेटावरून संगणक शिकत असतात (उदा. सुचवण्या) हे आवडते.", w:{ai:2, aiml:2, datasci:2}},
+/*12 */ {en:"You want to protect people's data and accounts from hackers.", mr:"हॅकर्सपासून लोकांचा डेटा व खाती सुरक्षित ठेवायची इच्छा आहे.", w:{cyber:3, it:2}},
+/*13 */ {en:"Hands-on lab work interests you more than only theory.", mr:"फक्त तत्त्वांपेक्षा प्रत्यक्ष प्रयोग जास्त आकर्षित करतात.", w:{mechanical:2, chemical:2, instrumentation:2, biomedical:2}},
+/*14 */ {en:"You enjoy making maps, planning roads or city layout.", mr:"नकाशे बनवणे, रस्ते नियोजित करणे किंवा शहराची रचना करायला आवडते.", w:{civil:3}},
+/*15 */ {en:"You like learning how mobile networks and messages travel.", mr:"मोबाईल नेटवर्क व संदेश कसे जातात हे शिकायला आवडते.", w:{entc:3, electronics:1}},
+/*16 */ {en:"You enjoy writing code that makes devices or robots do tasks.", mr:"यंत्रे/रोबोट काम करावेत म्हणून कोड लिहायला आवडते.", w:{cs:2, robotics:2, mechatronics:2}},
+/*17 */ {en:"Batteries, solar panels and renewable energy ideas interest you.", mr:"बॅटर्या, सौर पॅनेल व नूतनीकरणीय ऊर्जा विषयक कल्पना आकर्षित करतात.", w:{electrical:3, mechanical:1}},
+/*18 */ {en:"You like analyzing data (e.g., cricket stats, school results) to find patterns.", mr:"डेटा (उदा. क्रिकेट आकडे, शाळेचे निकाल) तपासून पॅटर्न शोधायला आवडते.", w:{datasci:3, aids:2}},
+/*19 */ {en:"You enjoy building simple IoT devices that connect to the internet.", mr:"इंटरनेटशी जोडलेली साधी IoT डिव्हाइस बनवायला आवडते.", w:{electronics:2, entc:2, mechatronics:1}},
+/*20 */ {en:"You are comfortable presenting ideas and drawings to people.", mr:"गटात कल्पना व रेषाचित्र सादर करण्यात तुमचा आत्मविश्वास आहे.", w:{civil:1, cs:1, it:1}},
+/*21 */ {en:"You follow step-by-step lab instructions and measure carefully.", mr:"प्रयोगशाळेतील सूचनांचे पाऊणपाऊण अनुसरण करायला आणि अचूक मोजमाप करायला आवडते.", w:{chemical:2, instrumentation:2, biomedical:2}},
+/*22 */ {en:"You try to speed up a slow computer or app for friends/family.", mr:"मंद संगणक किंवा अॅप वेगवान करायचा प्रयत्न करतो.", w:{cs:2, it:2, cyber:1}},
+/*23 */ {en:"AI chatbots and virtual assistants fascinate you.", mr:"AI चॅटबॉट्स व वर्च्युअल सहाय्यक आकर्षित करतात.", w:{ai:3, aiml:2}},
+/*24 */ {en:"You enjoy working outdoors with land and site measurements.", mr:"बाहेर जमिनीवर व साइटच्या मापांवर काम करायला आवडते.", w:{civil:3}},
+/*25 */ {en:"You like creating animations, websites, or user-friendly apps.", mr:"अॅनिमेशन, वेबसाइट किंवा वापरकर्त्याला सोपे अॅप बनवायला आवडते.", w:{cs:2, it:2}},
+/*26 */ {en:"You are curious how engines and factory machines are made.", mr:"इंधन इंजिन व कारखान्यांच्या यंत्रणा कशा बनतात हे जाणून घ्यायला आवडते.", w:{mechanical:3}},
+/*27 */ {en:"You like controlling devices remotely using your phone.", mr:"फोनने दूरून उपकरणे नियंत्रित करायला आवडते.", w:{entc:2, electronics:2, mechatronics:1}},
+/*28 */ {en:"You enjoy taking accurate measurements (temp, pressure, flow).", mr:"अचूक मोजमाप (तापमान, दाब, प्रवाह) घेऊन निरीक्षण करायला आवडते.", w:{instrumentation:3, chemical:1}},
+/*29 */ {en:"You dream of building self-driving cars or drones someday.", mr:"एक दिवस स्वयंचलित गाड्या किंवा ड्रोन बनवण्याचे स्वप्न पाहता.", w:{robotics:3, mechatronics:2, ai:1}},
+/*30 */ {en:"You wonder how food, medicines or chemicals are manufactured.", mr:"अन्न, औषधे किंवा रसायने कशी तयार करतात हे जाणून घ्यायचे.", w:{chemical:3, biomedical:1}},
+/*31 */ {en:"You enjoy debugging code to make it error-free.", mr:"कोडमधील त्रुटी शोधून ते दुरुस्त करण्यात आनंद होतो.", w:{cs:3, it:1}},
+/*32 */ {en:"You like planning small electrical circuits for lights and buzzers.", mr:"लहान परिपथ (लाइट्स, बजर) कसे बनवायचे हे शिकायला आवडते.", w:{electronics:2, electrical:2}},
+/*33 */ {en:"You are interested in cloud storage and how companies keep big data.", mr:"क्लाउड व मोठा डेटा कंपन्या कशा साठवतात हे जाणून घ्यायला आवडते.", w:{it:2, datasci:1, cs:1}},
+/*34 */ {en:"Reading about big dams, bridges and construction projects excites you.", mr:"मोठ्या धरणे, पूल व बांधकाम प्रकल्प वाचणे आकर्षक वाटते.", w:{civil:3}},
+/*35 */ {en:"You want to learn about microchips that run phones and computers.", mr:"फोन व संगणक चालवणाऱ्या मायक्रोचिप्सबद्दल जाणून घ्यायला आवडते.", w:{electronics:2, cs:1}},
+/*36 */ {en:"You like solving everyday technical problems for family/friends.", mr:"नित्याच्या तांत्रिक समस्या सोडवायला आवडते.", w:{it:2, mechanical:1, electrical:1}},
+/*37 */ {en:"Data visualizations that explain trends clearly fascinate you.", mr:"डेटाच्या ट्रेंड्स स्पष्ट करणारे व्हिज्युअलायझेशन आवडते.", w:{datasci:3, aids:2}},
+/*38 */ {en:"You enjoy showing and explaining your science fair project to visitors.", mr:"विज्ञान प्रदर्शनात आपले प्रोजेक्ट लोकांना समजावून सांगायला आवडते.", w:{robotics:1, mechatronics:1, cs:1, electronics:1}},
+/*39 */ {en:"You love learning how sensors detect motion, light or temperature.", mr:"सेंसर कसे हलचाल, प्रकाश किंवा तापमान ओळखतात हे शिकायला आवडते.", w:{instrumentation:2, electronics:2}},
+/*40 */ {en:"You are comfortable following strict safety rules in labs or factories.", mr:"प्रयोगशाळा किंवा कारखान्यातील सुरक्षा नियम पाळणे तुम्हाला सोयीचे वाटते.", w:{chemical:2, mechanical:1, civil:1}},
+/*41 */ {en:"You are eager to learn both math and programming together.", mr:"गणित आणि प्रोग्रॅमिंग एकत्र शिकण्याची इच्छा आहे.", w:{cs:2, ai:2, aiml:1, datasci:1}},
+/*42 */ {en:"You get satisfaction from improving a machine's efficiency.", mr:"यंत्राच्या कार्यक्षमतेत वाढ करणे तुम्हाला समाधान देते.", w:{mechanical:2, electrical:1, mechatronics:1}},
+/*43 */ {en:"You like protecting websites, networks and data from attacks.", mr:"वेबसाइट, नेटवर्क व डेटा हल्ल्यांपासून सुरक्षित ठेवायला आवडते.", w:{cyber:3, it:1}},
+/*44 */ {en:"Understanding how medicines interact with the human body interests you.", mr:"औषधं मानवी शरीरावर कशी परिणाम करतात हे समजून घ्यायला उत्सुकता आहे.", w:{biomedical:2, chemical:1}},
+/*45 */ {en:"You enjoy designing small systems that combine software and hardware (home automation).", mr:"सॉफ्टवेअर-हार्डवेअर एकत्र करून छोटे सिस्टम (उदा. होम ऑटोमेशन) बनवायला आवडते.", w:{mechatronics:2, electronics:2, cs:1}},
+/*46 */ {en:"You wonder how factories control large processes automatically.", mr:"कारखान्यात मोठ्या प्रक्रियांना स्वयंचलितपणे कसे नियंत्रित करतात हे जाणून घ्यायला आवडते.", w:{instrumentation:2, chemical:1, mechanical:1}},
+/*47 */ {en:"You enjoy the logic behind encryption and secret codes.", mr:"एन्क्रिप्शन व गुप्त कोडमागील तर्क समजायला आवडते.", w:{cyber:2, cs:1}},
+/*48 */ {en:"You like making quick prototypes using cardboard, motors and small electronics.", mr:"कार्डबोर्ड, मोटर व लहान इलेक्ट्रॉनिक्सने प्रोटोटाइप बनवायला आवडते.", w:{robotics:2, mechatronics:2, electronics:1}},
+/*49 */ {en:"Projects that use large datasets to predict future trends excite you.", mr:"मोठ्या डेटासेट वापरून भविष्यातील ट्रेंड्स ओळखणारे प्रकल्प आकर्षित करतात.", w:{datasci:3, aiml:2, aids:2}},
+/*50 */ {en:"You prefer a career that blends design, logic, creativity and hands-on building.", mr:"डिझाईन, तर्क, सर्जनशीलता आणि हाताने बनवण्याचे काम एकत्र असलेला व्यवसाय पसंत आहे.", w:{mechatronics:2, robotics:2, cs:1, datasci:1}}
+];
+
+/* =========================
+   Helpers and state
+   ========================= */
+
+const TOTAL = QUESTIONS.length;
+let state = {
+  idx: 0,
+  answers: Array(TOTAL).fill(null), // store selected option index for UX if needed
+  scores: Object.fromEntries(Object.keys(BRANCHES).map(k => [k,0])),
+};
+
+/* Option templates - for simplicity 3 options are used on many questions to keep it friendly.
+   Option values: 2=Strong Yes, 1=Maybe, 0=No
+   We map these to adding weight * optionValue to branch scores.
+*/
+const OPTIONS = [
+  {val:2, en:"Yes — I like this", mr:"हो — मला आवडते"},
+  {val:1, en:"Maybe — I'm curious", mr:"शक्य आहे — उत्सुक आहे"},
+  {val:0, en:"No — not for me", mr:"नाही — मला नाही"}
+];
+
+/* =========================
+   UI refs
+   ========================= */
+const startBtn = document.getElementById('startBtn');
+const howBtn = document.getElementById('howBtn');
+const intro = document.getElementById('intro');
+const quizArea = document.getElementById('quizArea');
+const qEnglish = document.getElementById('qEnglish');
+const qMarathi = document.getElementById('qMarathi');
+const optionsWrap = document.getElementById('options');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const skipBtn = document.getElementById('skipBtn');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const qIcon = document.getElementById('qIcon');
+const resultArea = document.getElementById('resultArea');
+const resultContainer = document.getElementById('resultContainer');
+const restartBtn = document.getElementById('restartBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+
+/* =========================
+   Behavior
+   ========================= */
+
+startBtn.addEventListener('click', ()=> {
+  intro.style.display='none';
+  quizArea.style.display='block';
+  state.idx = 0;
+  renderQuestion();
+  updateProgress();
+});
+
+howBtn.addEventListener('click', ()=> {
+  alert("This quiz shows short situational questions in English + Marathi. Answer honestly. Each answer adds points to branches. At the end you'll see top 3 branches and bilingual reasons. ही क्विझ इंग्रजी व मराठीत छोटी वास्तविक परिस्थिती प्रश्न विचारते. प्रामाणिकपणे उत्तर द्या.");
+});
+
+prevBtn.addEventListener('click', ()=> {
+  if(state.idx>0){ state.idx--; renderQuestion(); updateProgress();}
+});
+skipBtn.addEventListener('click', ()=> {
+  // mark as skipped (null) and move next
+  state.answers[state.idx] = null;
+  state.idx = Math.min(TOTAL-1, state.idx+1);
+  renderQuestion(); updateProgress();
+});
+nextBtn.addEventListener('click', ()=> {
+  // require selection; allow skip though - better to require choose maybe
+  const sel = optionsWrap.querySelector('input[type=radio]:checked');
+  if(!sel){
+    alert("Please choose an option — कृपया एक पर्याय निवडा");
+    return;
+  }
+  // store
+  const optVal = Number(sel.value);
+  state.answers[state.idx] = optVal;
+  // update scores immediately so user can navigate freely
+  recalcScores();
+  // forward
+  if(state.idx < TOTAL-1) {
+    state.idx++;
+    renderQuestion();
+    updateProgress();
+  } else {
+    finishQuiz();
+  }
+});
+
+restartBtn.addEventListener('click', ()=> {
+  // reset
+  state = {
+    idx:0,
+    answers: Array(TOTAL).fill(null),
+    scores: Object.fromEntries(Object.keys(BRANCHES).map(k => [k,0])),
+  };
+  resultArea.style.display='none';
+  intro.style.display='block';
+  quizArea.style.display='none';
+  resultContainer.innerHTML='';
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* download report */
+downloadBtn.addEventListener('click', ()=> {
+  const top = getTopBranches(3);
+  const payload = {
+    date: new Date().toLocaleString(),
+    topBranches: top,
+    answers: state.answers,
+    scores: state.scores
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ebst-quiz-report.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* render question */
+function renderQuestion(){
+  const q = QUESTIONS[state.idx];
+  qEnglish.textContent = `${state.idx+1}. ${q.en}`;
+  qMarathi.textContent = q.mr;
+  // icon change based on main mapped branch
+  const topMap = Object.keys(q.w).sort((a,b)=> q.w[b]-q.w[a])[0];
+  qIcon.innerHTML = getIconSVG(topMap);
+  // options
+  optionsWrap.innerHTML = '';
+  for(let i=0;i<OPTIONS.length;i++){
+    const o = OPTIONS[i];
+    const label = document.createElement('label');
+    label.className='opt';
+    label.innerHTML = `<input type="radio" name="opt" value="${o.val}" ${state.answers[state.idx] === o.val ? 'checked' : ''} /> <div><div class="label" style="font-weight:600">${o.en}</div><div class="meta">${o.mr}</div></div>`;
+    optionsWrap.appendChild(label);
+  }
+  // buttons state
+  prevBtn.style.visibility = state.idx===0 ? 'hidden' : 'visible';
+  nextBtn.textContent = state.idx===TOTAL-1 ? 'Finish — समाप्त करा' : 'Next — पुढे';
+  // small animation
+  document.getElementById('questionCard').classList.remove('fadeIn');
+  void document.getElementById('questionCard').offsetWidth;
+  document.getElementById('questionCard').classList.add('fadeIn');
+}
+
+/* progress */
+function updateProgress(){
+  const pct = Math.round((state.idx / (TOTAL-1)) * 100);
+  progressBar.style.width = pct + '%';
+  progressText.textContent = `${Math.min(state.idx+1,TOTAL)} / ${TOTAL}`;
+}
+
+/* compute scores based on answers */
+function recalcScores(){
+  // reset scores
+  state.scores = Object.fromEntries(Object.keys(BRANCHES).map(k => [k,0]));
+  for(let i=0;i<TOTAL;i++){
+    const ans = state.answers[i];
+    if(ans === null || ans === undefined) continue;
+    const q = QUESTIONS[i];
+    // q.w maps branches to weight 1..3
+    for(const b in q.w){
+      const weight = q.w[b] || 0;
+      // ans is 0/1/2: multiply
+      state.scores[b] += weight * ans;
+    }
+  }
+}
+
+/* finish */
+function finishQuiz(){
+  // ensure last answer recorded
+  const sel = optionsWrap.querySelector('input[type=radio]:checked');
+  if(sel){
+    state.answers[state.idx] = Number(sel.value);
+  }
+  recalcScores();
+  // show result
+  quizArea.style.display='none';
+  displayResult();
+  resultArea.style.display='block';
+  updateProgressBarOnResult();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* get top N branches */
+function getTopBranches(n=3){
+  const arr = Object.entries(state.scores).map(([k,v]) => ({k,v}));
+  arr.sort((a,b)=> b.v - a.v);
+  return arr.slice(0,n).map(item => ({key:item.k, score:item.v, info:BRANCHES[item.k]}));
+}
+
+/* display result */
+function displayResult(){
+  resultContainer.innerHTML = '';
+  const top = getTopBranches(3);
+  // contextual message in both languages
+  const intro = document.createElement('div');
+  intro.innerHTML = `<div style="padding:12px;border-radius:10px;background:linear-gradient(90deg,#06202a,#02131a);border:1px solid rgba(255,255,255,0.02)"><strong style="font-size:16px">Top suggestions — सर्वोत्तम सुचना</strong><div style="color:var(--muted);margin-top:6px">Here are the branches best matching your answers. खाली तुमच्या उत्तरांशी जुळणाऱ्या शाखा आहेत.</div></div>`;
+  resultContainer.appendChild(intro);
+
+  top.forEach(t => {
+    const bc = document.createElement('div');
+    bc.className='branchCard fadeIn';
+    bc.innerHTML = `
+      <div class="branchIcon" style="background:linear-gradient(90deg, ${t.info.color}, #60a5fa);">${t.info.name.split(' ').map(w=>w[0]).slice(0,3).join('')}</div>
+      <div class="branchText">
+        <h3>${t.info.name} — <span style="color:var(--marathi)">${t.info.mr}</span></h3>
+        <p><strong>Why it fits you — ही शाखा का योग्य आहे:</strong></p>
+        <p style="margin-top:6px;color:var(--muted)">${explainBranch(t.key)}</p>
+        <p style="margin-top:6px;color:var(--muted)"><strong>Score:</strong> ${t.score}</p>
+      </div>
+    `;
+    resultContainer.appendChild(bc);
+  });
+
+  // show a short personalised summary
+  const summary = document.createElement('div');
+  summary.style.marginTop='12px';
+  const best = top[0];
+  summary.innerHTML = `<div style="padding:12px;border-radius:10px;background:linear-gradient(90deg,#071827,#01111a);border:1px solid rgba(255,255,255,0.03)"><strong style="font-size:15px">Personal note — वैयक्तिक टिप:</strong>
+    <div style="color:var(--muted);margin-top:8px">Based on your answers, <strong>${best.info.name}</strong> (${best.info.mr}) matches your interests and strengths. Try small projects or workshops related to this branch — it will help confirm your choice. तुम्हाला छोट्या प्रोजेक्ट्स, वर्कशॉप्स किंवा ऑनलाईन कोर्सेस करून हा अभ्यास करण्याचा सल्ला देतो. </div></div>`;
+  resultContainer.appendChild(summary);
+
+  // show full detailed table of all branch scores
+  const tableWrap = document.createElement('div');
+  tableWrap.style.marginTop='12px';
+  let rows = '';
+  const sorted = Object.entries(state.scores).sort((a,b)=>b[1]-a[1]);
+  rows += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">`;
+  sorted.forEach(([k,v])=>{
+    const info = BRANCHES[k];
+    rows += `<div style="min-width:220px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02);display:flex;gap:10px;align-items:center;margin-bottom:8px">
+      <div style="width:44px;height:44px;border-radius:8px;background:${info.color};display:flex;align-items:center;justify-content:center;font-weight:700">${info.name.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+      <div style="flex:1">
+        <div style="font-weight:700">${info.name} — <span style="color:var(--marathi)">${info.mr}</span></div>
+        <div style="color:var(--muted);font-size:13px;margin-top:6px">${info.short} • Score: ${v}</div>
+      </div>
+    </div>`;
+  });
+  rows += `</div>`;
+  tableWrap.innerHTML = rows;
+  resultContainer.appendChild(tableWrap);
+}
+
+/* explanation generation for top branch (bilingual) */
+function explainBranch(key){
+  const info = BRANCHES[key];
+  // create a reason based on highest contributing topics
+  let reasonEn = '', reasonMr='';
+  switch(key){
+    case 'civil':
+      reasonEn = "You show interest in structures, planning and outdoor site work — key in Civil Engineering.";
+      reasonMr = "तुम्हाला संरचना, नियोजन आणि साइटवरील काम आवडते — जे सिव्हिल इंजिनिअरिंगमध्ये महत्त्वाचे असते.";
+      break;
+    case 'mechanical':
+      reasonEn = "You enjoy machines, repairing and improving mechanical efficiency — core to Mechanical Engineering.";
+      reasonMr = "यंत्रे दुरुस्त करणे आणि कार्यक्षमता सुधारण्याचा आनंद, हे मेकेनिकल शाखेचे मुख्य भाग आहेत.";
+      break;
+    case 'entc':
+      reasonEn = "You are curious about communication networks and electronics — ideal for ENTC.";
+      reasonMr = "तुमची रुची नेटवर्क्स व इलेक्ट्रॉनिक्समध्ये आहे — ENTC साठी उत्तम.";
+      break;
+    case 'electronics':
+      reasonEn = "You like opening gadgets, working with circuits and small boards.";
+      reasonMr = "गॅझेट उघडून परिपथ व बोर्डसह काम करायला आवडते.";
+      break;
+    case 'electrical':
+      reasonEn = "Interest in power, batteries and renewable energy matches Electrical Engineering.";
+      reasonMr = "वीज, बॅटरी व नूतनीकरणीय ऊर्जा यातील रुची इलेक्ट्रिकलशी सुसंगत आहे.";
+      break;
+    case 'cs':
+      reasonEn = "You enjoy coding, apps and problem-solving — core to Computer Science.";
+      reasonMr = "कोडिंग, अ‍ॅप्स आणि समस्या सोडवण्याची आवड संगणक शास्त्रासाठी उपयुक्त आहे.";
+      break;
+    case 'it':
+      reasonEn = "You like networks, systems and helping others with tech problems.";
+      reasonMr = "नेटवर्क्स, सिस्टीम्स आणि तांत्रिक समस्यांचे निराकरण करायला आवडणे IT साठी उपयोगी आहे.";
+      break;
+    case 'ai':
+      reasonEn = "Your curiosity about intelligent assistants and automation points to AI fields.";
+      reasonMr = "बुद्धिमान सहाय्यक व स्वयंचलनाबद्दल उत्सुकता AI कडे निर्देश करते.";
+      break;
+    case 'aiml':
+      reasonEn = "Interest in learning systems and algorithms suits AI & ML.";
+      reasonMr = "शिकणाऱ्या संगणकीय प्रणाल्या व अल्गोरिदममध्ये रुची AI & ML साठी योग्य आहे.";
+      break;
+    case 'aids':
+    case 'datasci':
+      reasonEn = "You like analyzing data, spotting trends and building insights — perfect for Data Science.";
+      reasonMr = "डेटा विश्लेषण, ट्रेंड ओळखणे व अंतर्दृष्टी निर्माण करणे डेटा सायन्ससाठी उत्तम आहे.";
+      break;
+    case 'mechatronics':
+      reasonEn = "You prefer blending mechanics, electronics and programming — Mechatronics fits well.";
+      reasonMr = "यांत्रिकी, इलेक्ट्रॉनिक्स व प्रोग्रामिंग एकत्र करणे आवडेल तर मेकाट्रॉनिक्स योग्य आहे.";
+      break;
+    case 'chemical':
+      reasonEn = "Curiosity about chemical processes and manufacturing indicates Chemical Engineering.";
+      reasonMr = "रासायनिक प्रक्रिया व उत्पादनाबद्दलची उत्सुकता केमिकल इंजिनिअरिंग दर्शवते.";
+      break;
+    case 'biomedical':
+      reasonEn = "Interest in medical devices and patient testing matches Biomedical Engineering.";
+      reasonMr = "वैद्यकीय उपकरणे व रुग्ण तपासणीबद्दलची रुची बायोमेडिकलसाठी उपयुक्त आहे.";
+      break;
+    case 'instrumentation':
+      reasonEn = "You like sensors, measurements and control systems — instrumentation is the fit.";
+      reasonMr = "सेंसर, मोजमाप व नियंत्रण प्रणालीबद्दल आवड असल्यास इन्स्ट्रुमेंटेशन योग्य आहे.";
+      break;
+    case 'robotics':
+      reasonEn = "Dream of autonomous machines, drones and automation aligns with Robotics.";
+      reasonMr = "स्वयंपूर्ण यंत्रे, ड्रोन व ऑटोमेशनचे स्वप्न रोबोटिक्सशी सुसंगत आहे.";
+      break;
+    case 'cyber':
+      reasonEn = "Desire to protect systems and data from attackers is core to Cybersecurity.";
+      reasonMr = "प्रणाली व डेटा हल्ल्यांपासून रक्षण करण्याची इच्छा सायबरसुरक्षेच्या मुख्य गुणात येते.";
+      break;
+    default:
+      reasonEn = info.short;
+      reasonMr = info.short;
+  }
+  return `${reasonEn} / ${reasonMr}`;
+}
+
+/* some simple SVGs keyed by branch (small visual variety) */
+function getIconSVG(branchKey){
+  const s = {
+    civil:`<svg width="42" height="42" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" fill="#60a5fa" opacity="0.95"></rect><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01" stroke="#021430" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+    mechanical:`<svg width="42" height="42" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f59e0b"/><path d="M12 8v8M8 12h8" stroke="#07202a" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+    entc:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#7c3aed"/><path d="M7 12h10M7 8h10M7 16h10" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+    electronics:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="#10b981"/><circle cx="12" cy="12" r="3" fill="#031015"/></svg>`,
+    electrical:`<svg width="42" height="42" viewBox="0 0 24 24"><path d="M12 3l-3 8h6l-3 10" fill="#ef4444"/></svg>`,
+    cs:`<svg width="42" height="42" viewBox="0 0 24 24"><rect width="24" height="24" rx="5" fill="#06b6d4"/><path d="M7 8h10M7 12h10M7 16h6" stroke="#021430" stroke-linecap="round" stroke-width="1.2"/></svg>`,
+    it:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#a78bfa"/><path d="M7 8h10M7 16h10" stroke="#fff" stroke-width="1.2"/></svg>`,
+    ai:`<svg width="42" height="42" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f472b6"/><path d="M9 9h6M9 15h6" stroke="#021430" stroke-width="1.2"/></svg>`,
+    aiml:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#60a5fa"/><path d="M8 8h8M8 12h8M8 16h4" stroke="#021430" stroke-width="1.2"/></svg>`,
+    aids:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#34d399"/><path d="M7 12h10M10 8v8" stroke="#021430" stroke-width="1.2"/></svg>`,
+    mechatronics:`<svg width="42" height="42" viewBox="0 0 24 24"><path d="M12 2l3 6h6l-5 4 2 6-6-4-6 4 2-6-5-4h6z" fill="#fb7185"/></svg>`,
+    chemical:`<svg width="42" height="42" viewBox="0 0 24 24"><path d="M6 3h12l-3 9v6H9v-6L6 3z" fill="#f97316"/></svg>`,
+    biomedical:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#60a5fa"/><path d="M8 12h8M12 8v8" stroke="#021430" stroke-width="1.2"/></svg>`,
+    instrumentation:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#10b981"/><circle cx="12" cy="12" r="4" fill="#021430"/></svg>`,
+    robotics:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" fill="#8b5cf6"/><circle cx="8.5" cy="10.5" r="1.2" fill="#fff"/><circle cx="15.5" cy="10.5" r="1.2" fill="#fff"/></svg>`,
+    datasci:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="3" fill="#06b6d4"/><path d="M6 14v-4M10 16v-8M14 12v-2M18 18v-12" stroke="#021430" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+    cyber:`<svg width="42" height="42" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#ef4444"/><path d="M6 12h12" stroke="#fff" stroke-width="1.2"/></svg>`
+  };
+  return s[branchKey] || s['cs'];
+}
+
+/* initialize progress bar width */
+progressBar.style.width = '0%';
+
+/* autoplay: allow keyboard navigation */
+document.addEventListener('keydown', (e)=>{
+  if(quizArea.style.display==='block'){
+    if(e.key === 'ArrowRight') nextBtn.click();
+    if(e.key === 'ArrowLeft') prevBtn.click();
+  }
+});
+
+/* update progress bar on result screen for fun */
+function updateProgressBarOnResult(){
+  progressBar.style.width = '100%';
+  progressText.textContent = `${TOTAL} / ${TOTAL}`;
+}
+
+/* initial small greeting */
+console.log("EBST Quiz loaded — ready.");
+
+/* Safety: confirm before leaving page */
+window.addEventListener('beforeunload', function (e) {
+  if(quizArea.style.display==='block'){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+</script>
+</body>
+</html>
